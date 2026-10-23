@@ -65,11 +65,14 @@ async def get_current_user(
             except Exception:
                 decoded = google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience="ztech-mindvault")
         except Exception as fallback_err:
-            logger.info(f"External verify failed ({fallback_err}), attempting JWT claims fallback...")
+            logger.info(f"External verify failed ({fallback_err}), attempting standard library JWT claims fallback...")
             try:
-                import jwt as pyjwt
+                import base64
+                import json
                 import time
-                unverified = pyjwt.decode(id_token, options={"verify_signature": False})
+                payload_part = id_token.split('.')[1]
+                padded = payload_part + '=' * (-len(payload_part) % 4)
+                unverified = json.loads(base64.urlsafe_b64decode(padded).decode('utf-8'))
                 aud = unverified.get("aud")
                 exp = unverified.get("exp", 0)
                 allowed_auds = ["ztech-mindvault", "mindvault-42341", os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")]
@@ -79,7 +82,8 @@ async def get_current_user(
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token claims")
             except HTTPException:
                 raise
-            except Exception:
+            except Exception as decode_err:
+                logger.warning(f"Fallback decode failed: {decode_err}")
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token")
 
     firebase_uid: str = decoded.get("user_id") or decoded.get("sub") or decoded.get("uid")
