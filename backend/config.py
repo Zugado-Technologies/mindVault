@@ -48,7 +48,7 @@ class Settings(BaseSettings):
 
     # Auth Settings
     auth_method: str = "credentials"  # "credentials" or "otp"
-    firebase_project_id: str = "mindvault-42341"
+    firebase_project_id: str = "ztech-mindvault"
 
     # OTP settings (only used if auth_method="otp")
     otp_expire_minutes: int = 10

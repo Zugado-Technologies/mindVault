@@ -4,10 +4,14 @@ MindVault smoke test — runs against a live backend at http://localhost:8000.
 Usage: python test_smoke.py
 """
 import asyncio
-import httpx
+import os
 import sys
+import httpx
 
-BASE = "http://localhost:8000"
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+BASE = os.getenv("BASE_URL", "http://localhost:8000")
 
 
 async def run():

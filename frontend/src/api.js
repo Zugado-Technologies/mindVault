@@ -1,7 +1,7 @@
 import axios from "axios";
 import { auth } from "./firebase";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.hostname !== "localhost" && !window.location.hostname.includes("127.0.0.1") ? "https://mindvault-sfny.onrender.com" : "");
 export const api = axios.create({ baseURL: `${API_URL}/api` });
 
 api.interceptors.request.use(async (config) => {

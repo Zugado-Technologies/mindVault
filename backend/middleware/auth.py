@@ -38,7 +38,7 @@ def _init_firebase():
     else:
         cred = credentials.ApplicationDefault()
         
-    firebase_admin.initialize_app(cred, {"projectId": os.getenv("FIREBASE_PROJECT_ID", "mindvault-42341")})
+    firebase_admin.initialize_app(cred, {"projectId": os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")})
     _firebase_initialized = True
     logger.info("✅ Firebase Admin SDK initialized")
 
@@ -49,18 +49,25 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    id_token = credentials.credentials
+    decoded = None
     try:
         decoded = firebase_auth.verify_id_token(id_token)
-    except firebase_auth.ExpiredIdTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Firebase token expired")
-    except firebase_auth.InvalidIdTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token")
     except Exception as e:
-        logger.warning(f"Firebase token verification failed: {e}")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token verification failed")
+        logger.info(f"firebase_admin verify failed ({e}), trying google.oauth2 fallback for ztech-mindvault...")
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            # Support both ztech-mindvault and any configured project
+            project_id = os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")
+            try:
+                decoded = google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience=project_id)
+            except Exception:
+                decoded = google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience="ztech-mindvault")
+        except Exception as fallback_err:
+            logger.warning(f"All Firebase token verification methods failed: {fallback_err}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token")
 
-    firebase_uid: str = decoded["uid"]
+    firebase_uid: str = decoded.get("user_id") or decoded.get("sub") or decoded.get("uid")
     email: str = decoded.get("email", "")
     display_name: str = decoded.get("name", "") or decoded.get("display_name", "")
 
