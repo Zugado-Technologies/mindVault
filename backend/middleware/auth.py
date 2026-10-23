@@ -49,6 +49,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
+    id_token = credentials.credentials
     decoded = None
     try:
         decoded = firebase_auth.verify_id_token(id_token)
