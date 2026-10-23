@@ -82,7 +82,7 @@ termination won't break the HMAC check.
 1. Open the dashboard (local: `http://localhost:5173`, or your Vercel URL).
 2. Sign in, then go to **Settings → General → WhatsApp**.
 3. Enter your number and click **Link**.
-   - Country code is optional for 10-digit Indian numbers: `8955558388` → `+918955558388`
+   - Country code is optional for 10-digit Indian numbers: `9876543210` → `+919876543210`
    - Spaces, dashes and brackets are all accepted
 
 > **Why linking happens in the web app, not over WhatsApp:** your identity is already

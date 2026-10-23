@@ -462,7 +462,7 @@ Sandbox Settings → *When a message comes in*:
 **5. Link your number**
 
 Open the dashboard → **Settings → General → WhatsApp** → enter your number → **Link**.
-Country code is optional for 10-digit Indian numbers (`8955558388` → `+918955558388`).
+Country code is optional for 10-digit Indian numbers (`9876543210` → `+919876543210`).
 
 Linking happens in the web app, not over WhatsApp, because your identity is already
 proven by Firebase there — no OTP round trip needed, and an unknown number can never
