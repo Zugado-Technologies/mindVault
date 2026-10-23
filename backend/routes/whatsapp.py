@@ -7,6 +7,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select
 
+from config import get_settings
 from database import async_session
 from models import Note, User
 from services.agent import rag_agent
@@ -24,14 +25,17 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-LINK_INSTRUCTIONS = (
-    "👋 Welcome to MindVault!\n\n"
-    "This number isn't linked to a vault yet. To connect it:\n\n"
-    "1. Open https://mind-vault-piyush-malav-s-projects.vercel.app\n"
-    "2. Go to Settings → General\n"
-    "3. Add this number under WhatsApp and save\n\n"
-    "Then message me again and I'll save notes and answer questions from your vault."
-)
+
+def get_link_instructions() -> str:
+    frontend_url = get_settings().frontend_url.rstrip("/") if get_settings().frontend_url else "https://mindvault.vercel.app"
+    return (
+        "👋 Welcome to MindVault!\n\n"
+        "This number isn't linked to a vault yet. To connect it:\n\n"
+        f"1. Open {frontend_url}\n"
+        "2. Go to Settings → General\n"
+        "3. Add this number under WhatsApp and save\n\n"
+        "Then message me again and I'll save notes and answer questions from your vault."
+    )
 
 
 @router.post("/webhook")
@@ -75,7 +79,7 @@ async def whatsapp_webhook(request: Request):
 
         if not user:
             logger.info(f"[WhatsApp] Unlinked number messaged the bot: {phone}")
-            return twiml_reply(LINK_INSTRUCTIONS)
+            return twiml_reply(get_link_instructions())
 
         if not user.is_active:
             return twiml_reply("This account is disabled. Please contact support.")

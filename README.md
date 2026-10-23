@@ -8,7 +8,7 @@
 
 | | URL |
 |---|---|
-| **Dashboard** | [mind-vault-piyush-malav-s-projects.vercel.app](https://mind-vault-piyush-malav-s-projects.vercel.app) |
+| **Dashboard** | [mindvault.vercel.app](https://mindvault.vercel.app) |
 | **Backend API** | [mindvault-sfny.onrender.com/docs](https://mindvault-sfny.onrender.com/docs) |
 | **Chrome Extension** | [Chrome Web Store](https://chrome.google.com/webstore) *(pending review)* |
 
@@ -318,8 +318,8 @@ All free tier, no credit card required:
 ### Step 2 — Clone and Configure
 
 ```bash
-git clone https://github.com/jitenderss/MindVault.git
-cd MindVault
+git clone https://github.com/Zugado-Technologies/mindVault.git
+cd mindVault
 cp .env.example .env
 # Fill in your API keys in .env
 ```
@@ -938,5 +938,5 @@ MIT License — free to use for your own projects.
 ---
 
 <p align="center">
-  Built with ☕ and too many API calls by <a href="https://github.com/jitenderss">@jitenderss</a>
+  Built with ☕ and too many API calls by <a href="https://github.com/vinamrapandey">@vinamrapandey</a>
 </p>

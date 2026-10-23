@@ -6,7 +6,7 @@ from models import User, Note
 
 async def test():
     async with async_session() as db:
-        user = await db.execute(select(User).where(User.email == 'jitu@gmail.com'))
+        user = await db.execute(select(User).where(User.email == 'vinamrapandey22@gmail.com'))
         u = user.scalar_one_or_none()
         if not u:
             print("User not found!")

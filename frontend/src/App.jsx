@@ -19,7 +19,7 @@ import logo from './assets/logo.png';
 
 // Client-side check is cosmetic only (hides the nav link) — the backend's
 // CurrentAdmin dependency (ADMIN_EMAILS) is the actual access control.
-const ADMIN_EMAILS = ['piyushmalav85@gmail.com'];
+const ADMIN_EMAILS = ['vinamrapandey22@gmail.com'];
 
 function Sidebar() {
     const { user, logout } = useAuth();
