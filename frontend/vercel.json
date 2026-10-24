@@ -2,11 +2,11 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://mindvault-sfny.onrender.com/api/:path*"
+            "destination": "https://mindvault-backend.onrender.com/api/:path*"
         },
         {
             "source": "/auth/:path*",
-            "destination": "https://mindvault-sfny.onrender.com/auth/:path*"
+            "destination": "https://mindvault-backend.onrender.com/auth/:path*"
         },
         {
             "source": "/(.*)",
