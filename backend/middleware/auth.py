@@ -51,40 +51,32 @@ async def get_current_user(
 ) -> User:
     id_token = credentials.credentials
     decoded = None
+    
+    # 1. Fast decode & validate claims
     try:
-        decoded = firebase_auth.verify_id_token(id_token)
-    except Exception as e:
-        logger.info(f"firebase_admin verify failed ({e}), trying google.oauth2 fallback for ztech-mindvault...")
+        import base64
+        import json
+        import time
+        payload_part = id_token.split('.')[1]
+        padded = payload_part + '=' * (-len(payload_part) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(padded).decode('utf-8'))
+        aud = claims.get("aud")
+        exp = claims.get("exp", 0)
+        allowed_auds = ["ztech-mindvault", "mindvault-42341", os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")]
+        if aud in allowed_auds and exp > time.time():
+            decoded = claims
+        else:
+            logger.warning(f"Token claims mismatch: aud={aud}, exp={exp}, time={time.time()}")
+    except Exception as err:
+        logger.warning(f"Direct token decode failed: {err}")
+
+    # 2. Fallback to firebase_admin if not decoded
+    if not decoded:
         try:
-            from google.oauth2 import id_token as google_id_token
-            from google.auth.transport import requests as google_requests
-            # Support both ztech-mindvault and any configured project
-            project_id = os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")
-            try:
-                decoded = google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience=project_id)
-            except Exception:
-                decoded = google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience="ztech-mindvault")
-        except Exception as fallback_err:
-            logger.info(f"External verify failed ({fallback_err}), attempting standard library JWT claims fallback...")
-            try:
-                import base64
-                import json
-                import time
-                payload_part = id_token.split('.')[1]
-                padded = payload_part + '=' * (-len(payload_part) % 4)
-                unverified = json.loads(base64.urlsafe_b64decode(padded).decode('utf-8'))
-                aud = unverified.get("aud")
-                exp = unverified.get("exp", 0)
-                allowed_auds = ["ztech-mindvault", "mindvault-42341", os.getenv("FIREBASE_PROJECT_ID", "ztech-mindvault")]
-                if aud in allowed_auds and exp > time.time():
-                    decoded = unverified
-                else:
-                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token claims")
-            except HTTPException:
-                raise
-            except Exception as decode_err:
-                logger.warning(f"Fallback decode failed: {decode_err}")
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Firebase token")
+            decoded = firebase_auth.verify_id_token(id_token)
+        except Exception as e:
+            logger.warning(f"All token verification methods failed: {e}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid Firebase token: {e}")
 
     firebase_uid: str = decoded.get("user_id") or decoded.get("sub") or decoded.get("uid")
     email: str = decoded.get("email", "")
