@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import GraphView from "../components/GraphView";
-import { api } from "../api";
+import { api, listNotes } from "../api";
 import ReactMarkdown from 'react-markdown';
 
 const API = "/api";
@@ -58,6 +58,111 @@ export default function TopicsPage() {
             setGraphData(data);
             setFilteredData(data);
         } catch (err) {
+            console.warn("Backend /graph/data unavailable, generating knowledge graph from notes:", err);
+            try {
+                const notes = await listNotes();
+                if (notes && notes.length > 0) {
+                    const TOPIC_COLORS = ["#7C3AED", "#2563EB", "#059669", "#D97706", "#DC2626", "#0891B2", "#65A30D", "#9333EA"];
+                    
+                    // Group notes by dominant tags
+                    const tagMap = {};
+                    notes.forEach(n => {
+                        const tags = n.tags || [];
+                        tags.forEach(t => {
+                            const normalized = t.toLowerCase();
+                            if (!tagMap[normalized]) tagMap[normalized] = [];
+                            tagMap[normalized].push(n);
+                        });
+                    });
+                    
+                    // Pick top tags with >= 2 notes as topic clusters
+                    const topTags = Object.entries(tagMap)
+                        .filter(([_, list]) => list.length >= 2)
+                        .sort((a, b) => b[1].length - a[1].length)
+                        .slice(0, 6)
+                        .map(([tag]) => tag);
+                        
+                    const nodes = [];
+                    const links = [];
+                    
+                    topTags.forEach((tag, idx) => {
+                        const angle = (idx / topTags.length) * 2 * Math.PI;
+                        nodes.push({
+                            id: `topic-${tag}`,
+                            label: tag.toUpperCase(),
+                            type: "topic",
+                            color: TOPIC_COLORS[idx % TOPIC_COLORS.length],
+                            color_index: idx,
+                            count: tagMap[tag].length,
+                            degree: tagMap[tag].length + 2,
+                            graph_x: Math.cos(angle) * 2.8,
+                            graph_y: Math.sin(angle) * 2.8,
+                        });
+                    });
+                    
+                    notes.forEach((n, nIdx) => {
+                        const noteId = `note-${n.id}`;
+                        const nTags = (n.tags || []).map(t => t.toLowerCase());
+                        const matchedTopic = topTags.find(t => nTags.includes(t));
+                        const topicIdx = matchedTopic ? topTags.indexOf(matchedTopic) : -1;
+                        const topicColor = topicIdx !== -1 ? TOPIC_COLORS[topicIdx % TOPIC_COLORS.length] : "#8B5CF6";
+                        
+                        let nx = (Math.random() - 0.5) * 5;
+                        let ny = (Math.random() - 0.5) * 5;
+                        if (topicIdx !== -1) {
+                            const topicAngle = (topicIdx / topTags.length) * 2 * Math.PI;
+                            const noteOffsetAngle = (nIdx * 1.618) * 2 * Math.PI;
+                            const dist = 0.6 + (nIdx % 3) * 0.3;
+                            nx = Math.cos(topicAngle) * 2.8 + Math.cos(noteOffsetAngle) * dist;
+                            ny = Math.sin(topicAngle) * 2.8 + Math.sin(noteOffsetAngle) * dist;
+                        }
+
+                        nodes.push({
+                            id: noteId,
+                            label: n.title || "Untitled Note",
+                            type: "note",
+                            topic_id: matchedTopic ? `topic-${matchedTopic}` : null,
+                            color: topicColor,
+                            tags: nTags,
+                            source_url: n.source_url,
+                            degree: 3,
+                            is_outlier: !matchedTopic,
+                            graph_x: nx,
+                            graph_y: ny,
+                        });
+                        
+                        if (matchedTopic) {
+                            links.push({
+                                source: `topic-${matchedTopic}`,
+                                target: noteId,
+                                type: "topic_link",
+                            });
+                        }
+                    });
+                    
+                    // Add semantic similarity links between notes that share tags or concepts
+                    for (let i = 0; i < notes.length; i++) {
+                        for (let j = i + 1; j < notes.length; j++) {
+                            const tagsA = new Set((notes[i].tags || []).map(t => t.toLowerCase()));
+                            const shared = (notes[j].tags || []).filter(t => tagsA.has(t.toLowerCase()));
+                            if (shared.length > 0) {
+                                links.push({
+                                    source: `note-${notes[i].id}`,
+                                    target: `note-${notes[j].id}`,
+                                    type: "semantic_link",
+                                    value: shared.length,
+                                });
+                            }
+                        }
+                    }
+                    
+                    const synthesized = { nodes, links };
+                    setGraphData(synthesized);
+                    setFilteredData(synthesized);
+                }
+            } catch (fallbackErr) {
+                console.error("Fallback graph synthesis error:", fallbackErr);
+            }
             if (err.name === 'AbortError' || err.name === 'CanceledError') return;
             console.error("Failed to load graph data:", err);
         } finally {
@@ -167,9 +272,10 @@ export default function TopicsPage() {
             <div style={{ flex: 1, position: "relative", background: "var(--bg-primary)" }}>
 
                 {/* Top-left controls */}
-                <div style={{
+                <div className="graph-top-controls" style={{
                     position: "absolute", top: 16, left: 16, zIndex: 20,
-                    display: "flex", gap: 8, alignItems: "center",
+                    display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap",
+                    maxWidth: "calc(100vw - 32px)",
                 }}>
                     <input
                         type="text"
@@ -344,7 +450,7 @@ export default function TopicsPage() {
 
             {/* ──────────────── Side Panel ──────────────── */}
             {sidePanel && (
-                <div style={{
+                <div className="graph-side-panel" style={{
                     width: 320, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)",
                     display: "flex", flexDirection: "column", overflow: "hidden",
                     animation: "slideIn 0.2s ease",

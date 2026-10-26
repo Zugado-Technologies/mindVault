@@ -108,9 +108,9 @@ export default function SettingsModal({ onClose }) {
 
     return (
         <div style={overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-            <div style={modal}>
+            <div className="settings-modal" style={modal}>
                 {/* Sidebar */}
-                <div style={{ width: 220, padding: 24, paddingRight: 16, borderRight: "1px solid var(--border, #e8e5e0)", flexShrink: 0, display: "flex", flexDirection: "column", background: "var(--bg, #f5f4f1)" }}>
+                <div className="settings-sidebar" style={{ width: 220, padding: 24, paddingRight: 16, borderRight: "1px solid var(--border, #e8e5e0)", flexShrink: 0, display: "flex", flexDirection: "column", background: "var(--bg, #f5f4f1)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-dark, #1a1a1a)" }}>Settings</span>
                         <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted, #6b6b6b)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -151,7 +151,7 @@ export default function SettingsModal({ onClose }) {
                 </div>
 
                 {/* Main Content Area */}
-                <div style={{ flex: 1, padding: "40px 48px", overflowY: "auto", background: "var(--card-bg, #ffffff)" }}>
+                <div className="settings-content" style={{ flex: 1, padding: "40px 48px", overflowY: "auto", background: "var(--card-bg, #ffffff)" }}>
                     {tab === "general" && <>
                         <h2 style={{ fontWeight: 700, fontSize: 18, color: "var(--text-dark, #1a1a1a)", margin: "0 0 6px 0" }}>Account Settings</h2>
                         <p style={{ color: "var(--text-muted, #6b6b6b)", fontSize: 13, marginBottom: 32, margin: 0 }}>Manage your account details and profile.</p>

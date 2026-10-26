@@ -189,26 +189,26 @@ export default function NotePage() {
     }
 
     return (
-        <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        <div className="note-page-layout">
             {/* Left: Note detail */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '64px 80px', background: '#fff' }}>
+            <div className="note-page-content">
                 {/* Header */}
                 <button 
                     onClick={() => navigate(-1)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', marginBottom: 40, padding: 0 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', marginBottom: 32, padding: 0 }}
                 >
                     <ArrowLeft size={16} strokeWidth={2} /> Back to Vault
                 </button>
 
-                <div style={{ marginBottom: 48 }}>
+                <div style={{ marginBottom: 40 }}>
                     {isEditing ? (
                         <input
                             value={editTitle}
                             onChange={e => setEditTitle(e.target.value)}
-                            style={{ width: '100%', fontSize: '3.125rem', fontWeight: 700, margin: 0, lineHeight: 1.2, background: 'var(--bg)', color: 'var(--text-dark)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px', outline: 'none' }}
+                            style={{ width: '100%', fontSize: 'clamp(1.75rem, 5vw, 2.75rem)', fontWeight: 700, margin: 0, lineHeight: 1.2, background: 'var(--bg)', color: 'var(--text-dark)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 16px', outline: 'none' }}
                         />
                     ) : (
-                        <h1 style={{ fontSize: '3.125rem', fontWeight: 700, color: 'var(--text-dark)', margin: 0, lineHeight: 1.2 }}>
+                        <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.75rem)', fontWeight: 700, color: 'var(--text-dark)', margin: 0, lineHeight: 1.2 }}>
                             {note.title}
                         </h1>
                     )}
@@ -216,7 +216,7 @@ export default function NotePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginTop: 24, flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                             <Calendar size={16} strokeWidth={2} /> 
-                            {new Date(note.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            {new Date(note.created_at || note.createdAt || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                         </div>
                         
                         {note.source_url && (
@@ -416,7 +416,7 @@ export default function NotePage() {
             </div>
 
             {/* Right: Sidebar with Tabs */}
-            <div style={{ width: 440, borderLeft: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+            <div className="note-page-sidebar">
                 <div style={{ display: 'flex', padding: 16, gap: 8, background: '#fff', borderBottom: '1px solid var(--border)' }}>
                     <button 
                         onClick={() => setSidebarTab('chat')}

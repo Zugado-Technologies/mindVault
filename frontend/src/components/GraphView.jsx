@@ -289,15 +289,14 @@ export default function GraphView({
         if (showLabel && !isDimmed) {
             // Calculate base font size relative to zoom so text looks uniform 
             // no matter how close/far you are from the graph
-            let fontSize = isTopic
-                ? Math.max(5, 14 / globalScale)
-                : Math.max(3, 10 / globalScale);
+            let fontSize = Math.min(16, isTopic
+                ? Math.max(5, 13 / (globalScale || 1))
+                : Math.max(3, 9 / (globalScale || 1)));
 
             // Increase base text size when notes are the primary anchor points
             if (filterType === "notes" && !isTopic) {
-                // If it is hovered or highlighted, give it a prominent font bump
-                const pixelTarget = (isHovered || isHighlighted) ? 18 : 12;
-                fontSize = Math.max(4, pixelTarget / globalScale);
+                const pixelTarget = (isHovered || isHighlighted) ? 14 : 10;
+                fontSize = Math.min(16, Math.max(4, pixelTarget / (globalScale || 1)));
             }
 
             ctx.font = `${isTopic ? 600 : 400} ${fontSize}px Inter, sans-serif`;
@@ -404,12 +403,10 @@ export default function GraphView({
                 d3VelocityDecay={0.6}
                 nodeRelSize={1}
                 onEngineStop={() => {
-                    // Pin all nodes at their settled positions
-                    // Using requestAnimationFrame to prevent race condition with d3-force tick resulting in NaN coordinates
                     requestAnimationFrame(() => {
-                        const graphData = graphRef.current?.graphData();
-                        if (graphData && graphData.nodes) {
-                            graphData.nodes.forEach(n => {
+                        const gData = graphRef.current?.graphData();
+                        if (gData && gData.nodes) {
+                            gData.nodes.forEach(n => {
                                 if (Number.isFinite(n.x) && Number.isFinite(n.y)) {
                                     n.fx = n.x;
                                     n.fy = n.y;
@@ -418,14 +415,8 @@ export default function GraphView({
                                 }
                             });
                         }
-
-                        if (!initialFitDone.current && graphRef.current) {
-                            setTimeout(() => {
-                                if (graphRef.current) {
-                                    graphRef.current.zoomToFit(600, 60);
-                                }
-                            }, 50);
-                            initialFitDone.current = true;
+                        if (graphRef.current) {
+                            graphRef.current.zoomToFit(400, 60);
                         }
                     });
                 }}

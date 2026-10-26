@@ -8,8 +8,8 @@
 
 | | URL |
 |---|---|
-| **Dashboard** | [mindvault.vercel.app](https://mindvault.vercel.app) |
-| **Backend API** | [mindvault-sfny.onrender.com/docs](https://mindvault-sfny.onrender.com/docs) |
+| **Dashboard** | [mindvault.zugadotechnologies.com](https://mindvault.zugadotechnologies.com) |
+| **Backend API** | [mindvault-backend.onrender.com](https://mindvault-backend.onrender.com) |
 | **Chrome Extension** | [Chrome Web Store](https://chrome.google.com/webstore) *(pending review)* |
 
 ---

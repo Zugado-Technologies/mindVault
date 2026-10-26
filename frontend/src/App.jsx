@@ -21,21 +21,8 @@ import logo from './assets/logo.png';
 // CurrentAdmin dependency (ADMIN_EMAILS) is the actual access control.
 const ADMIN_EMAILS = ['vinamrapandey22@gmail.com'];
 
-function Sidebar() {
-    const { user, logout } = useAuth();
-    const [settingsOpen, setSettingsOpen] = useState(false);
-    const [dueCount, setDueCount] = useState(0);
-
-    useEffect(() => {
-        if (!user) return;
-        const timer = setTimeout(() => {
-            api.get("/revision/stats")
-                .then(res => setDueCount(res.data.notes_due_today))
-                .catch(() => {});
-        }, 2000); // wait 2s after page load
-        return () => clearTimeout(timer);
-    }, [user]);
-
+function Sidebar({ dueCount, onOpenSettings }) {
+    const { user } = useAuth();
     const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
 
     const navItems = [
@@ -83,7 +70,7 @@ function Sidebar() {
             </div>
 
             <div style={{ borderTop: "1px solid var(--border)", padding: "12px 10px" }}>
-                <button onClick={() => setSettingsOpen(true)}
+                <button onClick={onOpenSettings}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "8px 10px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 500, fontSize: "0.875rem", flexShrink: 0 }}>
                         {user?.username?.[0]?.toUpperCase() || "U"}
@@ -93,16 +80,90 @@ function Sidebar() {
                         <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: 0, marginTop: 4, lineHeight: 1 }}>{user?.email || "user@example.com"}</p>
                     </div>
                 </button>
-                {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
             </div>
         </nav>
     );
 }
 
+function MobileHeader({ user, onOpenSettings }) {
+    const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+    return (
+        <header className="mobile-header">
+            <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                <img src={logo} alt="MindVault Logo" style={{ height: 28, display: 'block' }} />
+            </NavLink>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <NavLink to="/ai-store" className="mobile-icon-btn" title="AI Store">
+                    <ShoppingBag size={18} strokeWidth={1.75} />
+                </NavLink>
+                {isAdmin && (
+                    <NavLink to="/admin" className="mobile-icon-btn" title="Eval Dashboard">
+                        <ShieldCheck size={18} strokeWidth={1.75} />
+                    </NavLink>
+                )}
+                <button
+                    onClick={onOpenSettings}
+                    className="mobile-avatar-btn"
+                    aria-label="User Settings"
+                >
+                    {user?.username?.[0]?.toUpperCase() || "U"}
+                </button>
+            </div>
+        </header>
+    );
+}
+
+function MobileBottomNav({ dueCount }) {
+    const navItems = [
+        { to: "/", end: true, icon: <Database size={19} strokeWidth={1.75} />, label: "Vault" },
+        { to: "/revision", icon: <BookOpen size={19} strokeWidth={1.75} />, label: "Revision", badge: dueCount },
+        { to: "/topics", icon: <Network size={19} strokeWidth={1.75} />, label: "Graph" },
+        { to: "/search", icon: <Search size={19} strokeWidth={1.75} />, label: "Search" },
+        { to: "/chat", icon: <MessageCircle size={19} strokeWidth={1.75} />, label: "Chat" },
+    ];
+
+    return (
+        <nav className="mobile-bottom-nav">
+            {navItems.map(({ to, end, icon, label, badge }) => (
+                <NavLink
+                    key={to}
+                    to={to}
+                    end={end}
+                    className={({ isActive }) => `mobile-nav-item ${isActive ? "active" : ""}`}
+                >
+                    <div className="mobile-nav-icon-wrap">
+                        {icon}
+                        {badge > 0 && (
+                            <span className="mobile-nav-badge">{badge}</span>
+                        )}
+                    </div>
+                    <span>{label}</span>
+                </NavLink>
+            ))}
+        </nav>
+    );
+}
+
 function AuthenticatedLayout() {
+    const { user } = useAuth();
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [dueCount, setDueCount] = useState(0);
+
+    useEffect(() => {
+        if (!user) return;
+        const timer = setTimeout(() => {
+            api.get("/revision/stats")
+                .then(res => setDueCount(res.data.notes_due_today || 0))
+                .catch(() => {});
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [user]);
+
     return (
         <div className="app-layout">
-            <Sidebar />
+            <Sidebar dueCount={dueCount} onOpenSettings={() => setSettingsOpen(true)} />
+            <MobileHeader user={user} onOpenSettings={() => setSettingsOpen(true)} />
             <main className="app-main">
                 <Routes>
                     <Route path="/" element={<VaultPage />} />
@@ -116,6 +177,8 @@ function AuthenticatedLayout() {
                     <Route path="/admin" element={<AdminDashboardPage />} />
                 </Routes>
             </main>
+            <MobileBottomNav dueCount={dueCount} />
+            {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
         </div>
     );
 }

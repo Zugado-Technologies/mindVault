@@ -371,7 +371,7 @@ export default function VaultPage() {
     }
 
     return (
-        <div style={{ padding: '24px 40px' }}>
+        <div className="vault-page-container">
             <div className="page-header">
                 <div>
                     <span className="page-header-serif">your</span>
@@ -425,7 +425,7 @@ export default function VaultPage() {
 
                     {/* Filter Dropdown Panel */}
                     {isFiltersOpen && (
-                        <div style={{
+                        <div className="filter-dropdown-panel" style={{
                             position: 'absolute',
                             top: 'calc(100% + 8px)',
                             right: 0,
@@ -710,7 +710,7 @@ export default function VaultPage() {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, flexWrap: 'wrap', gap: 12 }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                             {extractedTags.map(tag => (
                                 <span key={tag} className="tag" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
@@ -719,7 +719,7 @@ export default function VaultPage() {
                             ))}
                         </div>
 
-                        <div style={{ display: 'flex', gap: 12 }}>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                             {isRecording ? (
                                 <button
                                     onClick={stopRecording}
@@ -869,23 +869,23 @@ export default function VaultPage() {
                                                     {note.is_audio && ' 🎤'}
                                                 </h3>
 
-                                                {cardPrefs.showSummary && note.summary && (
-                                                    <div className="card-summary">
-                                                        <ReactMarkdown>{note.summary}</ReactMarkdown>
+                                                {cardPrefs.showSummary && (note.summary || note.content) && (
+                                                    <div className="card-summary" style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.5, margin: '8px 0' }}>
+                                                        <p>{(note.summary || note.content || '').replace(/<[^>]*>?/gm, '').slice(0, 140)}...</p>
                                                     </div>
                                                 )}
 
-                                                {/* Auto Tags */}
-                                                {cardPrefs.showAutoTags && note.auto_tags && note.auto_tags.length > 0 && (
-                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                                        {note.auto_tags.slice(0, 3).map(tag => (
+                                                {/* Tags */}
+                                                {cardPrefs.showAutoTags && ((note.auto_tags && note.auto_tags.length > 0) || (note.tags && note.tags.length > 0)) && (
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                                                        {(note.auto_tags || note.tags || []).slice(0, 4).map(tag => (
                                                             <span key={tag} className="note-tag-chip">
                                                                 {highlightText(tag, keywordSearch)}
                                                             </span>
                                                         ))}
-                                                        {note.auto_tags.length > 3 && (
+                                                        {(note.auto_tags || note.tags || []).length > 4 && (
                                                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                                +{note.auto_tags.length - 3}
+                                                                +{(note.auto_tags || note.tags || []).length - 4}
                                                             </span>
                                                         )}
                                                     </div>
@@ -893,7 +893,7 @@ export default function VaultPage() {
                                             </div>
 
                                             <div className="card-meta">
-                                                <span>{new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                <span>{new Date(note.created_at || note.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                                     {note.estimated_retention !== undefined && (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }} title={`Memory Confidence: ${Math.round(note.estimated_retention * 100)}%`}>
