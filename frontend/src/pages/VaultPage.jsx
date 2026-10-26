@@ -662,7 +662,7 @@ export default function VaultPage() {
 
             {/* Create Note Inline Form */}
             {isCreatingNote && (
-                <div style={{
+                <div className="create-note-card" style={{
                     background: '#ffffff',
                     border: '1px solid var(--border)',
                     borderRadius: 16,

@@ -89,13 +89,15 @@ const MenuBar = ({ editor }) => {
             >
                 U
             </button>
-            <input
-                type="color"
-                onInput={event => editor.chain().focus().setColor(event.target.value).run()}
-                value={editor.getAttributes('textStyle').color || '#000000'}
-                className="toolbar-color-picker"
-                title="Text Color"
-            />
+            <label className="toolbar-color-label" title="Text Color">
+                <input
+                    type="color"
+                    onInput={event => editor.chain().focus().setColor(event.target.value).run()}
+                    value={editor.getAttributes('textStyle').color || '#000000'}
+                    className="toolbar-color-picker"
+                />
+                <span className="toolbar-color-indicator">A</span>
+            </label>
 
             <div className="toolbar-divider" />
 
@@ -226,24 +228,16 @@ export default function RichTextEditor({ content, onChange, placeholder = '' }) 
     });
 
     return (
-        <div className="editor-container" style={{ position: 'relative' }}>
+        <div className="editor-container">
             <MenuBar editor={editor} />
-            <EditorContent editor={editor} />
-            {editor && editor.isEmpty && placeholder && (
-                <div 
-                    style={{
-                        position: 'absolute',
-                        top: 56, // below toolbar
-                        left: 17,
-                        color: 'var(--text-muted)',
-                        pointerEvents: 'none',
-                        fontSize: 15,
-                        fontFamily: 'inherit'
-                    }}
-                >
-                    {placeholder}
-                </div>
-            )}
+            <div className="editor-content-wrap">
+                <EditorContent editor={editor} />
+                {editor && editor.isEmpty && placeholder && (
+                    <div className="editor-placeholder">
+                        {placeholder}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

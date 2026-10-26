@@ -45,10 +45,10 @@ export default function LoginPage() {
     };
 
     return (
-        <div style={{ display: 'flex', height: '100vh', width: '100vw', background: 'rgb(255, 255, 255)', overflow: 'hidden' }}>
+        <div className="login-screen-layout">
             
             {/* LEFT AREA: Form */}
-            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', padding: '40px 60px', position: 'relative' }}>
+            <div className="login-form-area">
                 <div style={{ marginBottom: 32, height: 40 }}></div>
                 <div style={{ maxWidth: 400, width: '100%', margin: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     
@@ -137,7 +137,7 @@ export default function LoginPage() {
                                 />
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', gap: 16 }}>
+                            <div className="login-password-row" style={{ display: 'flex', gap: 16 }}>
                                 <div style={{ flex: '1 1 0%' }}>
                                     <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 6, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Password</label>
                                     <input 
@@ -183,7 +183,7 @@ export default function LoginPage() {
             </div>
 
             {/* RIGHT AREA: Illustration panel */}
-            <div style={{ flex: '1.2 1 0%', background: 'var(--accent)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 64, position: 'relative', overflow: 'hidden' }}>
+            <div className="login-illustration-area" style={{ flex: '1.2 1 0%', background: 'var(--accent)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 64, position: 'relative', overflow: 'hidden' }}>
                 <img alt="MindVault" src={logo} style={{ position: 'absolute', top: 40, right: 40, height: 64, filter: 'brightness(0) invert(1)', zIndex: 10, opacity: 0.9 }} />
                 
                 <div style={{ position: 'absolute', inset: 0, opacity: 0.1, backgroundImage: 'radial-gradient(rgb(255, 255, 255) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
